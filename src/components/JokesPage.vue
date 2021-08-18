@@ -1,7 +1,10 @@
 <template>
   <v-main>
     <v-container>
-      <v-text-field placeholder="Enter a word to search for anecdote" />
+      <v-text-field
+        v-model="searchWord"
+        placeholder="Enter a word to search for anecdote"
+      />
       <v-card>
         <section v-if="errored">
           <p>
@@ -14,10 +17,10 @@
             Loading...
           </div>
           <div
-            v-for="it in info"
-            :key="it.id"
+            v-for="joke in filterArrJokes"
+            :key="joke"
           >
-            <p> {{ it.joke }} </p>
+            <p> {{ joke }} </p>
             <input type="checkbox">
           </div>
         </section>
@@ -35,18 +38,27 @@ export default {
   data() {
     return {
       info: null,
+      searchWord: '',
       errored: false,
       loading: true,
     };
   },
-  computed: {
 
+  computed: {
+    arrJokes() {
+      return this.info.map((it) => it.joke);
+    },
+    filterArrJokes() {
+      return this.arrJokes.filter((it) => it
+        .toString().toUpperCase().includes(this.searchWord.toUpperCase()));
+    },
   },
+
   mounted() {
     axios
-      .get('https://v2.jokeapi.dev/joke/Any?amount=10')
+      .get('https://v2.jokeapi.dev/joke/Any?type=single&amount=10')
       .then((response) => {
-        this.info = response.data.jokes.filter((it) => it.joke);
+        this.info = response.data.jokes;
       })
       .catch((error) => {
         console.log(error);
