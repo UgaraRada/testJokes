@@ -2,26 +2,37 @@
   <v-main>
     <v-container>
       <v-text-field
-        v-model="searchWord"
+        v-model="search"
         placeholder="Enter a word to search for anecdote"
+        class="pa-4"
       />
       <v-card>
-        <section v-if="errored">
+        <section v-if="error">
           <p>
             We're sorry, we're not able to retrieve this
             information at the moment, please try back later
           </p>
         </section>
         <section v-else>
-          <div v-if="loading">
+          <div
+            v-if="loading"
+            class="pa-1"
+          >
             Loading...
           </div>
           <div
-            v-for="joke in filterArrJokes"
-            :key="joke"
+            v-for="it in filteredJokes"
+            :key="it.id"
+            :class="it.active && 'active'"
           >
-            <p> {{ joke }} </p>
-            <input type="checkbox">
+            <div class="wrapper">
+              <p class="joke-text">
+                {{ it.joke }}
+              </p>
+              <v-icon @click="it.active = !it.active">
+                {{ it.active ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
+              </v-icon>
+            </div>
           </div>
         </section>
       </v-card>
@@ -37,39 +48,49 @@ export default {
 
   data() {
     return {
-      info: null,
-      searchWord: '',
-      errored: false,
+      jokes: [],
+      search: '',
+      error: false,
       loading: true,
     };
   },
 
   computed: {
-    arrJokes() {
-      return this.info.map((it) => it.joke);
-    },
-    filterArrJokes() {
-      return this.arrJokes.filter((it) => it
-        .toString().toUpperCase().includes(this.searchWord.toUpperCase()));
+    filteredJokes() {
+      return this.jokes.filter((it) => it.joke.toLowerCase().includes(this.search.toLowerCase()));
     },
   },
 
   mounted() {
-    axios
-      .get('https://v2.jokeapi.dev/joke/Any?type=single&amount=10')
+    axios.get('https://v2.jokeapi.dev/joke/Any?type=single&amount=10')
       .then((response) => {
-        this.info = response.data.jokes;
-      })
-      .catch((error) => {
-        console.log(error);
-        this.errored = true;
-      })
-      .finally(() => { (this.loading = false); });
+        this.jokes = response.data.jokes.map((it) => ({ ...it, active: false }));
+      }).catch(() => {
+        this.error = true;
+      }).finally(() => {
+        this.loading = false;
+      });
+  },
+  methods: {
+
   },
 };
 
 </script>
 
 <style scoped lang="scss">
-
+.active {
+  background-color: rgb(178, 200, 233);
+}
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid black;
+}
+.joke-text {
+  margin-bottom: 0;
+  margin-right: 30px;
+}
 </style>
