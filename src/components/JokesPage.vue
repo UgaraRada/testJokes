@@ -6,7 +6,7 @@
         placeholder="Enter a word to search for anecdote"
         class="pa-4"
       />
-      <v-expansion-panels>
+      <v-expansion-panels class="mb-4">
         <v-expansion-panel
           v-for="(item,i) in 1"
           :key="i"
@@ -52,18 +52,6 @@
             </div>
           </div>
         </section>
-      </v-card>
-
-      <v-card class="mt-2">
-        <ul>
-          <h2>Saved jokes</h2>
-          <li
-            v-for="it in savedJokes"
-            :key="it"
-          >
-            {{ it }}
-          </li>
-        </ul>
       </v-card>
     </v-container>
   </v-main>
