@@ -6,6 +6,23 @@
         placeholder="Enter a word to search for anecdote"
         class="pa-4"
       />
+      <v-expansion-panels>
+        <v-expansion-panel
+          v-for="(item,i) in 1"
+          :key="i"
+        >
+          <v-expansion-panel-header>
+            Saved jokes
+          </v-expansion-panel-header>
+          <v-expansion-panel-content
+            v-for="it in savedJokes"
+            :key="it"
+          >
+            {{ it }}
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
       <v-card>
         <section v-if="error">
           <p>
@@ -29,12 +46,24 @@
               <p class="joke-text">
                 {{ it.joke }}
               </p>
-              <v-icon @click="it.active = !it.active">
+              <v-icon @click="it.active = !it.active, addNewJoke(it.joke)">
                 {{ it.active ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
               </v-icon>
             </div>
           </div>
         </section>
+      </v-card>
+
+      <v-card class="mt-2">
+        <ul>
+          <h2>Saved jokes</h2>
+          <li
+            v-for="it in savedJokes"
+            :key="it"
+          >
+            {{ it }}
+          </li>
+        </ul>
       </v-card>
     </v-container>
   </v-main>
@@ -52,12 +81,22 @@ export default {
       search: '',
       error: false,
       loading: true,
+      savedJokes: JSON.parse(localStorage.getItem('savedJokes')) || [],
     };
   },
 
   computed: {
     filteredJokes() {
       return this.jokes.filter((it) => it.joke.toLowerCase().includes(this.search.toLowerCase()));
+    },
+
+  },
+  watch: {
+    savedJokes: {
+      handler() {
+        localStorage.setItem('savedJokes', JSON.stringify(this.savedJokes));
+      },
+      deep: true,
     },
   },
 
@@ -72,7 +111,11 @@ export default {
       });
   },
   methods: {
-
+    addNewJoke(joke) {
+      const set = new Set(this.savedJokes);
+      set.add(joke);
+      this.savedJokes = [...set];
+    },
   },
 };
 
@@ -80,7 +123,7 @@ export default {
 
 <style scoped lang="scss">
 .active {
-  background-color: rgb(178, 200, 233);
+  background-color: rgb(194, 209, 233);
 }
 .wrapper {
   display: flex;
