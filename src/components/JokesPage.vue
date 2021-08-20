@@ -3,22 +3,19 @@
     <v-container>
       <v-text-field
         v-model="search"
-        placeholder="Enter a word to search for anecdote"
+        placeholder="Enter a word to search for an anecdote"
         class="pa-4"
       />
-      <v-expansion-panels class="mb-4">
-        <v-expansion-panel
-          v-for="(item,i) in 1"
-          :key="i"
-        >
-          <v-expansion-panel-header>
+      <v-expansion-panels class="mb-6">
+        <v-expansion-panel>
+          <v-expansion-panel-header class="font-weight-bold">
             Saved jokes
           </v-expansion-panel-header>
           <v-expansion-panel-content
             v-for="it in savedJokes"
-            :key="it"
+            :key="it.id"
           >
-            {{ it }}
+            {{ it.joke }}
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -40,16 +37,18 @@
           <div
             v-for="it in filteredJokes"
             :key="it.id"
+            class="joke"
             :class="it.active && 'active'"
           >
-            <div class="wrapper">
-              <p class="joke-text">
-                {{ it.joke }}
-              </p>
-              <v-icon @click="it.active = !it.active, addNewJoke(it.joke)">
-                {{ it.active ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
-              </v-icon>
-            </div>
+            <p class="joke__text">
+              {{ it.joke }}
+            </p>
+            <v-icon
+              :color="it.active? 'blue' : ''"
+              @click="toggleLike(it)"
+            >
+              {{ it.active ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
+            </v-icon>
           </div>
         </section>
       </v-card>
@@ -79,14 +78,6 @@ export default {
     },
 
   },
-  watch: {
-    savedJokes: {
-      handler() {
-        localStorage.setItem('savedJokes', JSON.stringify(this.savedJokes));
-      },
-      deep: true,
-    },
-  },
 
   mounted() {
     axios.get('https://v2.jokeapi.dev/joke/Any?type=single&amount=10')
@@ -99,10 +90,25 @@ export default {
       });
   },
   methods: {
-    addNewJoke(joke) {
-      const set = new Set(this.savedJokes);
-      set.add(joke);
-      this.savedJokes = [...set];
+    toggleLike(it) {
+      it.active = !it.active;
+
+      if (it.active) {
+        this.addJokeToSaved(it);
+      } else {
+        this.removeJokeFromSaved(it);
+      }
+
+      localStorage.setItem('savedJokes', JSON.stringify(this.savedJokes));
+    },
+    addJokeToSaved(it) {
+      if (this.savedJokes.some((joke) => joke.id === it.id)) {
+        return;
+      }
+      this.savedJokes.push(it);
+    },
+    removeJokeFromSaved(it) {
+      this.savedJokes = this.savedJokes.filter((joke) => joke.id !== it.id);
     },
   },
 };
@@ -110,18 +116,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.active {
-  background-color: rgb(194, 209, 233);
-}
-.wrapper {
+.joke {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px;
-  border-bottom: 1px solid black;
-}
-.joke-text {
-  margin-bottom: 0;
-  margin-right: 30px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+
+  &.active {
+    background-color: rgb(224 237 255);
+  }
+
+  &__text {
+    margin-bottom: 0;
+    margin-right: 30px;
+  }
 }
 </style>
