@@ -6,7 +6,10 @@
         placeholder="Enter a word to search for an anecdote"
         class="pa-4"
       />
-      <saved-jokes :saved-jokes="savedJokes" />
+      <saved-jokes
+        :saved-jokes="savedJokes"
+        @removeJokeFromSaved="removeJokeFromSaved"
+      />
       <v-card>
         <section v-if="error">
           <p>
@@ -14,7 +17,7 @@
             information at the moment, please try back later
           </p>
         </section>
-        <section v-else>
+        <div v-else>
           <div
             v-if="loading"
             class="pa-1"
@@ -24,7 +27,7 @@
           <div
             v-for="it in filteredJokes"
             :key="it.id"
-            class="joke"
+            class="joke joke--main"
             :class="it.active && 'active'"
           >
             <p class="joke__text">
@@ -37,7 +40,7 @@
               {{ it.active ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}
             </v-icon>
           </div>
-        </section>
+        </div>
       </v-card>
     </v-container>
   </v-main>
@@ -87,17 +90,21 @@ export default {
       } else {
         this.removeJokeFromSaved(it);
       }
-
-      localStorage.setItem('savedJokes', JSON.stringify(this.savedJokes));
     },
     addJokeToSaved(it) {
       if (this.savedJokes.some((joke) => joke.id === it.id)) {
         return;
       }
       this.savedJokes.push(it);
+      this.updateLocalStorage();
     },
     removeJokeFromSaved(it) {
       this.savedJokes = this.savedJokes.filter((joke) => joke.id !== it.id);
+      it.active = false;
+      this.updateLocalStorage();
+    },
+    updateLocalStorage() {
+      localStorage.setItem('savedJokes', JSON.stringify(this.savedJokes));
     },
   },
 };
@@ -105,10 +112,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
+
 .joke {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 
@@ -116,9 +121,5 @@ export default {
     background-color: rgb(224 237 255);
   }
 
-  &__text {
-    margin-bottom: 0;
-    margin-right: 30px;
-  }
 }
 </style>
