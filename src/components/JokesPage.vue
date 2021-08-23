@@ -30,7 +30,7 @@
             class="joke joke--main"
             :class="it.active && 'active'"
           >
-            <p class="joke__text">
+            <p class="joke--text">
               {{ it.joke }}
             </p>
             <v-icon

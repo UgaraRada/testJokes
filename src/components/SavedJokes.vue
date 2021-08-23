@@ -9,7 +9,7 @@
         :key="it.id"
       >
         <div class="joke joke--saved">
-          <p class="joke__text">
+          <p class="joke--text">
             {{ it.joke }}
           </p>
           <button
@@ -38,7 +38,7 @@ export default {
 
 .joke {
 
-  &__text {
+  &--text {
     line-height: 2rem;
   }
 }
